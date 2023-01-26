@@ -4,15 +4,36 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
-const hre = require("hardhat")
-const { items } = require("../src/items.json")
+const { ethers } = require("hardhat");
+const hre = require("hardhat");
+const { items } = require("../src/items.json");
 
 const tokens = (n) => {
-  return ethers.utils.parseUnits(n.toString(), 'ether')
-}
+  return ethers.utils.parseUnits(n.toString(), "ether");
+};
 
 async function main() {
+  const [deployer] = await ethers.getSigners();
+  const Daamazon = await hre.ethers.getContractFactory("Daamazon");
+  const daamazon = await Daamazon.deploy();
+  await daamazon.deployed();
+  console.log(`Deplolyed Daamazon Contract at :${daamazon.address}\n`);
 
+  for (let i = 0; i < items.length; i++) {
+    const trnasaction = await daamazon
+      .connect(deployer)
+      .list(
+        items[i].id,
+        items[i].name,
+        items[i].category,
+        items[i].image,
+        tokens(items[i].price),
+        items[i].rating,
+        items[i].stock
+      );
+    await trnasaction.wait();
+    console.log(`Listed item ${items[i].id}: ${items[i].name}`);
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere
