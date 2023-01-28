@@ -19,6 +19,12 @@ function App() {
   const [electronics, setElectronics] = useState(null);
   const [clothing, setClothing] = useState(null);
   const [toys, setToys] = useState(null);
+  const [item, setItem] = useState({});
+  const [toggle, setToggle] = useState(false);
+  const togglePop = (item) => {
+    setItem(item);
+    toggle ? setToggle(false) : setToggle(true);
+  };
   const loadBlockchainData = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     setProvider(provider);
@@ -35,9 +41,13 @@ function App() {
       const item = await daamazon.items(i + 1);
       items.push(item);
     }
+    console.log(items);
     const electronics = items.filter((item) => item.category === "electronics");
     const clothing = items.filter((item) => item.category === "clothing");
     const toys = items.filter((item) => item.category === "toys");
+    setElectronics(electronics);
+    setClothing(clothing);
+    setToys(toys);
   };
   useEffect(() => {
     loadBlockchainData();
@@ -46,10 +56,31 @@ function App() {
     <div>
       <Navigation account={account} setAccount={setAccount} />
       <h2>Daamazon Best Sellers</h2>
-     {electronics&&clothing&&toys?App(
+      {electronics && clothing && toys && (
+        <>
+          <Section
+            title={"Clothing &Jewelry"}
+            items={clothing}
+            togglePop={togglePop}
+          />
 
-      <p>Products</p>
-     )}
+          <Section
+            title={"Electronics &Gadgets"}
+            items={electronics}
+            togglePop={togglePop}
+          />
+          <Section title={"Toys & Gaming"} items={toys} togglePop={togglePop} />
+        </>
+      )}
+      {toggle && (
+        <Product
+          item={item}
+          provider={provider}
+          account={account}
+          daamazon={daamazon}
+          togglePop={togglePop}
+        />
+      )}
     </div>
   );
 }
